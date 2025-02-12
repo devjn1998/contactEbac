@@ -1,10 +1,19 @@
 import React, { useState } from "react";
 import AdicionarContato from "../AdicionarContato.tsx";
 import Botao from "../Utils/Botao/Botao.tsx";
+import { Contato } from "../../types/Contato.ts";
 
-const Welcome = () => {
-  const [showAdcContato, setShowAdcContato] = useState(false);
+interface WelcomeProps {
+  onNovoContato: (contato: Contato) => void;
+  showAdcContato: boolean;
+  setShowAdcContato: (show: boolean) => void;
+}
 
+const Welcome = ({
+  onNovoContato,
+  showAdcContato,
+  setShowAdcContato,
+}: WelcomeProps) => {
   const handleShowAdcContato = () => {
     setShowAdcContato(!showAdcContato);
   };
@@ -19,8 +28,9 @@ const Welcome = () => {
           {showAdcContato ? "← Voltar" : "Adicionar contato"}
         </Botao>
       </div>
-      {showAdcContato && <AdicionarContato onNovoContato={() => {}} />}
+      {showAdcContato && <AdicionarContato onNovoContato={onNovoContato} />}
     </div>
   );
 };
+
 export default Welcome;

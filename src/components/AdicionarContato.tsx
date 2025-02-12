@@ -50,12 +50,6 @@ const AdicionarContato = ({ onNovoContato }: AdicionarContatoProps) => {
 
     onNovoContato(novoContato);
 
-    // Salvar no localStorage
-    const contatosSalvos = localStorage.getItem("contatos");
-    const contatos = contatosSalvos ? JSON.parse(contatosSalvos) : [];
-    contatos.push(novoContato);
-    localStorage.setItem("contatos", JSON.stringify(contatos));
-
     // Limpar os campos após adicionar
     setInputs([""]);
     event.currentTarget.reset();

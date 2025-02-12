@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Contato } from "../../types/Contato.ts";
+import Modal from "../Utils/Modal/Modal.tsx";
 
-const Lista = () => {
-  const [contatos, setContatos] = useState<Contato[]>([]);
+interface ListaProps {
+  contatos: Contato[];
+  onDeletarContato: (index: number) => void;
+}
 
-  const buscarContatos = () => {
-    const contatosSalvos = localStorage.getItem("contatos");
-    if (contatosSalvos) {
-      setContatos(JSON.parse(contatosSalvos));
-    }
-  };
-
-  useEffect(() => {
-    buscarContatos();
-  }, []);
-
-  const deletarContato = (index: number) => {
-    const novosContatos = contatos.filter((_, i) => i !== index);
-    setContatos(novosContatos);
-    localStorage.setItem("contatos", JSON.stringify(novosContatos));
-  };
-
-  const handleNovoContato = (contato: Contato) => {
-    const novosContatos = [...contatos, contato];
-    setContatos(novosContatos);
-    localStorage.setItem("contatos", JSON.stringify(novosContatos));
-  };
+const Lista = ({ contatos, onDeletarContato }: ListaProps) => {
+  const [contatoSelecionado, setContatoSelecionado] = useState<Contato | null>(
+    null
+  );
+  const [modalAberto, setModalAberto] = useState(false);
 
   const abrirWhatsapp = (telefone: string) => {
     const numeroLimpo = telefone.replace(/\D/g, "");
     window.open(`https://wa.me/55${numeroLimpo}`, "_blank");
+  };
+
+  const abrirModal = (contato: Contato) => {
+    setContatoSelecionado(contato);
+    setModalAberto(true);
   };
 
   return (
@@ -60,6 +51,25 @@ const Lista = () => {
                 {contato.email}
               </span>
               <span className="w-2/5 flex justify-center gap-1 md:gap-2">
+                <button
+                  onClick={() => abrirModal(contato)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
+                  title="Visualizar detalhes"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
                 {contato.telefones?.map((telefone, telIndex) => (
                   <button
                     key={telIndex}
@@ -78,7 +88,7 @@ const Lista = () => {
                   </button>
                 ))}
                 <button
-                  onClick={() => deletarContato(index)}
+                  onClick={() => onDeletarContato(index)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
                   title="Deletar contato"
                 >
@@ -100,6 +110,53 @@ const Lista = () => {
           ))}
         </ul>
       </div>
+
+      <Modal isOpen={modalAberto} onClose={() => setModalAberto(false)}>
+        {contatoSelecionado && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Detalhes do Contato
+            </h2>
+            <div className="space-y-2">
+              <p className="text-gray-600">
+                <span className="font-semibold">Nome:</span>{" "}
+                {contatoSelecionado.nome}
+              </p>
+              <p className="text-gray-600">
+                <span className="font-semibold">E-mail:</span>{" "}
+                {contatoSelecionado.email}
+              </p>
+              <div className="space-y-1">
+                <p className="font-semibold text-gray-600">Telefones:</p>
+                <ul className="list-disc list-inside">
+                  {contatoSelecionado.telefones.map((telefone, index) => (
+                    <li
+                      key={index}
+                      className="text-gray-600 flex items-center gap-2"
+                    >
+                      {telefone}
+                      <button
+                        onClick={() => abrirWhatsapp(telefone)}
+                        className="bg-green-500 text-white p-1 rounded hover:bg-green-600 transition-colors"
+                        title="Abrir no WhatsApp"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
